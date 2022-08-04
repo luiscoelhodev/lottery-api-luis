@@ -20,6 +20,10 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/', async () => {
+Route.get('/hello', async () => {
   return { hello: 'world' }
+})
+
+Route.group(() => {
+  Route.resource('/users', 'UsersController').apiOnly()
 })
