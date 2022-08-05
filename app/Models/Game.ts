@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, beforeCreate, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, beforeCreate, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import { v4 as uuidv4 } from 'uuid'
+import Bet from './Bet'
 
 export default class Game extends BaseModel {
   @column({ isPrimary: true })
@@ -37,4 +38,7 @@ export default class Game extends BaseModel {
   public static assignUuid(game: Game) {
     game.secureId = uuidv4()
   }
+
+  @hasMany(() => Bet)
+  public bets: HasMany<typeof Bet>
 }
