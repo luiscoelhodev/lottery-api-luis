@@ -35,6 +35,11 @@ Route.get('/db_connection', async ({ response }: HttpContextContract) => {
   })
 })
 
+Route.post('/login', 'AuthController.login')
+Route.get('/test_auth', async ({ response }: HttpContextContract) => {
+  return response.ok({ message: 'You are authenticated.' })
+}).middleware('auth')
+
 Route.group(() => {
   Route.resource('/users', 'UsersController').apiOnly()
 })
