@@ -22,23 +22,32 @@ import Route from '@ioc:Adonis/Core/Route'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 
-Route.get('/hello', async () => {
-  return { hello: 'world' }
-})
+Route.group(() => {
+  Route.get('/db_connection', async ({ response }: HttpContextContract) => {
+    await Database.report().then((health) => {
+      if (health.health.healthy === true) {
+        return response.ok({ message: `Awesome! Connection is healthy (:` })
+      }
+      return response.status(500).json({ message: `Connection is not healthy :(` })
+    })
+  }).middleware(['auth', 'is:admin'])
 
-Route.get('/db_connection', async ({ response }: HttpContextContract) => {
-  await Database.report().then((health) => {
-    if (health.health.healthy === true) {
-      return response.ok({ message: `Awesome! Connection is healthy (:` })
-    }
-    return response.status(500).json({ message: `Connection is not healthy :(` })
+  Route.get('/hello', async () => {
+    return { hello: 'world' }
   })
-})
+
+  Route.post('/login', 'AuthController.login')
+
+  Route.get('/auth_admin', async ({ response }: HttpContextContract) => {
+    return response.ok({ message: 'You are authenticated as an admin.' })
+  }).middleware(['auth', 'is:admin'])
+
+  Route.get('/auth_player', async ({ response }: HttpContextContract) => {
+    return response.ok({ message: 'You are authenticated as a player.' })
+  }).middleware(['auth', 'is:player'])
+}).prefix('/tests')
 
 Route.post('/login', 'AuthController.login')
-Route.get('/test_auth', async ({ response }: HttpContextContract) => {
-  return response.ok({ message: 'You are authenticated.' })
-}).middleware('auth')
 
 Route.group(() => {
   Route.resource('/users', 'UsersController').apiOnly()
