@@ -52,3 +52,7 @@ Route.post('/login', 'AuthController.login')
 Route.group(() => {
   Route.resource('/users', 'UsersController').apiOnly()
 })
+
+Route.group(() => {
+  Route.resource('/games', 'GamesController').apiOnly()
+})
