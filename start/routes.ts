@@ -56,3 +56,11 @@ Route.group(() => {
 Route.group(() => {
   Route.resource('/games', 'GamesController').apiOnly()
 })
+
+Route.group(() => {
+  Route.post('/bets', 'BetsController.store')
+}).middleware(['auth', 'is:player'])
+
+Route.group(() => {
+  Route.resource('/bets', 'BetsController').only(['index', 'show'])
+}).middleware(['auth', 'is:admin'])
