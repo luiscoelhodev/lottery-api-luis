@@ -64,3 +64,10 @@ Route.group(() => {
 Route.group(() => {
   Route.resource('/bets', 'BetsController').only(['index', 'show'])
 }).middleware(['auth', 'is:admin'])
+
+Route.group(() => {
+  Route.get('/info', 'CartController.index')
+  Route.put('/update', 'CartController.update')
+})
+  .prefix('/cart')
+  .middleware(['auth', 'is:admin'])
