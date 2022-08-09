@@ -2,6 +2,8 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
+import StoreValidator from 'App/Validators/User/StoreValidator'
+import UpdateValidator from 'App/Validators/User/UpdateValidator'
 
 export default class UsersController {
   public async index({ response }: HttpContextContract) {
@@ -14,6 +16,8 @@ export default class UsersController {
   }
 
   public async store({ request, response }: HttpContextContract) {
+    await request.validate(StoreValidator)
+
     const userBody = request.only(['name', 'cpf', 'email', 'password'])
 
     const user = new User()
@@ -37,6 +41,7 @@ export default class UsersController {
 
     try {
       userFound = await User.query().where('id', user.id).preload('roles').first()
+      return response.ok({ userFound })
     } catch (error) {
       ;(await userTransaction).rollback()
       return response.notFound({
@@ -44,7 +49,6 @@ export default class UsersController {
         error: error.message,
       })
     }
-    return response.ok({ userFound })
   }
 
   public async show({ params, response }: HttpContextContract) {
@@ -59,6 +63,8 @@ export default class UsersController {
   }
 
   public async update({ params, request, response }: HttpContextContract) {
+    await request.validate(UpdateValidator)
+
     const userSecureId = params.id
     const userBody = request.only(['name', 'cpf', 'email', 'password'])
 
