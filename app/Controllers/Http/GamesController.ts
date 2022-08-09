@@ -1,6 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Game from 'App/Models/Game'
+import StoreValidator from 'App/Validators/Game/StoreValidator'
+import UpdateValidator from 'App/Validators/Game/UpdateValidator'
 
 export default class GamesController {
   public async index({ response }: HttpContextContract) {
@@ -13,6 +15,8 @@ export default class GamesController {
   }
 
   public async store({ request, response }: HttpContextContract) {
+    await request.validate(StoreValidator)
+
     const gameBody = request.only([
       'type',
       'description',
@@ -59,6 +63,8 @@ export default class GamesController {
   }
 
   public async update({ request, response, params }: HttpContextContract) {
+    await request.validate(UpdateValidator)
+
     const gameSecureId = params.id
     const gameBody = request.only([
       'type',
