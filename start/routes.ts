@@ -22,6 +22,8 @@ import Route from '@ioc:Adonis/Core/Route'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 
+// Test Routes -> DB Connection, 'Hello World' and Permission'
+
 Route.group(() => {
   Route.get('/db_connection', async ({ response }: HttpContextContract) => {
     await Database.report().then((health) => {
@@ -36,8 +38,6 @@ Route.group(() => {
     return { hello: 'world' }
   })
 
-  Route.post('/login', 'AuthController.login')
-
   Route.get('/auth_admin', async ({ response }: HttpContextContract) => {
     return response.ok({ message: 'You are authenticated as an admin.' })
   }).middleware(['auth', 'is:admin'])
@@ -47,15 +47,23 @@ Route.group(() => {
   }).middleware(['auth', 'is:player'])
 }).prefix('/tests')
 
+// Public Routes (No authentication required)
+
 Route.post('/login', 'AuthController.login')
 
+// Private Routes (Authentication required)
+
 Route.group(() => {
-  Route.resource('/users', 'UsersController').apiOnly()
-})
+  Route.resource('/users', 'UsersController').only(['store', 'update'])
+}).middleware(['auth', 'is:player'])
+
+Route.group(() => {
+  Route.resource('/users', 'UsersController').only(['index', 'show', 'destroy'])
+}).middleware(['auth', 'is:admin'])
 
 Route.group(() => {
   Route.resource('/games', 'GamesController').apiOnly()
-})
+}).middleware(['auth', 'is:admin'])
 
 Route.group(() => {
   Route.post('/bets', 'BetsController.store')
