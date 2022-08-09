@@ -59,6 +59,7 @@ Route.group(() => {
 
 Route.group(() => {
   Route.resource('/users', 'UsersController').only(['index', 'show', 'destroy'])
+  Route.post('/users/permission', 'UsersController.grantPermission')
 }).middleware(['auth', 'is:admin'])
 
 Route.group(() => {

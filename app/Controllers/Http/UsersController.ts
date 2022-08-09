@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Role from 'App/Models/Role'
@@ -106,6 +107,38 @@ export default class UsersController {
       return response.notFound({
         message: 'Error in deletind user: user not found',
         error: error.message,
+      })
+    }
+  }
+
+  public async grantPermission({ request, response }: HttpContextContract) {
+    const { user_id, roles } = request.all()
+
+    try {
+      const userToGrantPermission = await User.findByOrFail('id', user_id)
+
+      let roleIds: number[] = []
+      await Promise.all(
+        roles.map(async (roleType) => {
+          const hasRole = await Role.findBy('type', roleType)
+          if (hasRole) roleIds.push(hasRole.id)
+        })
+      )
+
+      await userToGrantPermission.related('roles').sync(roleIds)
+    } catch (error) {
+      return response.badRequest({
+        message: 'Error in granting permission.',
+        originalError: error.message,
+      })
+    }
+
+    try {
+      return User.query().where('id', user_id).preload('roles').firstOrFail()
+    } catch (error) {
+      return response.badRequest({
+        message: 'Error in finding user',
+        originalError: error.message,
       })
     }
   }
