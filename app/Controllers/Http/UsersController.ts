@@ -5,6 +5,7 @@ import Role from 'App/Models/Role'
 import User from 'App/Models/User'
 import StoreValidator from 'App/Validators/User/StoreValidator'
 import UpdateValidator from 'App/Validators/User/UpdateValidator'
+import { DateTime } from 'luxon'
 
 export default class UsersController {
   public async index({ response }: HttpContextContract) {
@@ -54,9 +55,21 @@ export default class UsersController {
 
   public async show({ params, response }: HttpContextContract) {
     const userSecureId = params.id
+    const nowMinusOneMonth = DateTime.now()
+      .setZone('America/Sao_Paulo')
+      .setLocale('pt-br')
+      .minus({ months: 1 })
+      .toSQLDate()
 
     try {
-      const userFound = await User.query().where('secure_id', userSecureId).preload('roles').first()
+      const userFound = await User.query()
+        .where('secure_id', userSecureId)
+        .preload('roles')
+        .preload('bets', (betsQuery) => {
+          betsQuery.where('created_at', '>', nowMinusOneMonth)
+        })
+        .first()
+
       return response.ok({ userFound })
     } catch (error) {
       return response.notFound({ message: `User not found.`, error: error.message })
