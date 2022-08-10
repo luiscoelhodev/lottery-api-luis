@@ -3,6 +3,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
+import { sendMail } from 'App/Services/sendMail'
 import StoreValidator from 'App/Validators/User/StoreValidator'
 import UpdateValidator from 'App/Validators/User/UpdateValidator'
 import { DateTime } from 'luxon'
@@ -37,13 +38,22 @@ export default class UsersController {
       return response.badRequest({ message: `Error in creating user.`, error: error.message })
     }
 
+    try {
+      await sendMail(user, 'Welcome to Lottery API!', 'email/welcome')
+    } catch (error) {
+      ;(await userTransaction).rollback()
+      return response.badRequest({
+        message: `Error in sending welcome email.`,
+        error: error.message,
+      })
+    }
+
     ;(await userTransaction).commit()
 
     let userFound
 
     try {
       userFound = await User.query().where('id', user.id).preload('roles').first()
-      return response.ok({ userFound })
     } catch (error) {
       ;(await userTransaction).rollback()
       return response.notFound({
@@ -51,6 +61,8 @@ export default class UsersController {
         error: error.message,
       })
     }
+
+    return response.ok({ userFound })
   }
 
   public async show({ params, response }: HttpContextContract) {
