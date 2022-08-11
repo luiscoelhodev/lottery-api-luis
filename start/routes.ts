@@ -49,6 +49,7 @@ Route.group(() => {
 
 // Public Routes (No authentication required)
 
+Route.post('/users', 'UsersController.store')
 Route.post('/login', 'AuthController.login')
 Route.post('/user/get-reset-password-token', 'UsersController.generateAndSendResetPasswordToken')
 Route.post('/user/reset-password', 'UsersController.validateTokenToResetPassword')
@@ -56,7 +57,7 @@ Route.post('/user/reset-password', 'UsersController.validateTokenToResetPassword
 // Private Routes (Authentication required)
 
 Route.group(() => {
-  Route.resource('/users', 'UsersController').only(['store', 'update'])
+  Route.resource('/users', 'UsersController').only(['update'])
 }).middleware(['auth', 'is:player'])
 
 Route.group(() => {
