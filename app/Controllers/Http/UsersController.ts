@@ -211,4 +211,27 @@ export default class UsersController {
 
     return response.ok({ token: tokenFound.token })
   }
+
+  public async validateTokenToResetPassword({ request, response }: HttpContextContract) {
+    const { token, newPassword } = request.all()
+    const nowMinus30Mins = DateTime.now()
+      .setZone('America/Sao_Paulo')
+      .setLocale('pt-br')
+      .minus({ minutes: 30 })
+      .toSQL()
+
+    const tokenFound = await ResetPassToken.findByOrFail('token', token)
+    if (tokenFound.createdAt.toSQL() < nowMinus30Mins) {
+      return response.badRequest({ error: `Your token has already expired!` })
+    }
+
+    try {
+      const userFound = await User.findByOrFail('email', tokenFound.email)
+      userFound.password = newPassword
+      await userFound.save()
+      return response.ok({ message: `Your password was reset! Please, log in.` })
+    } catch (error) {
+      return response.badRequest({ message: `Error in reseting password.`, error: error.message })
+    }
+  }
 }
