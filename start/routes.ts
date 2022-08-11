@@ -50,6 +50,7 @@ Route.group(() => {
 // Public Routes (No authentication required)
 
 Route.post('/login', 'AuthController.login')
+Route.post('/user/get-reset-password-token', 'UsersController.generateAndSendResetPasswordToken')
 
 // Private Routes (Authentication required)
 

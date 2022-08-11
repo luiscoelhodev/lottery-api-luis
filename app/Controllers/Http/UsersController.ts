@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
+import ResetPassToken from 'App/Models/ResetPassToken'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
-import { sendMail } from 'App/Services/sendMail'
+import { sendMail, sendResetPasswordTokenMail } from 'App/Services/sendMail'
 import StoreValidator from 'App/Validators/User/StoreValidator'
 import UpdateValidator from 'App/Validators/User/UpdateValidator'
 import { DateTime } from 'luxon'
@@ -166,5 +167,48 @@ export default class UsersController {
         originalError: error.message,
       })
     }
+  }
+
+  public async generateAndSendResetPasswordToken({ request, response }: HttpContextContract) {
+    const { email } = request.all()
+    const newToken = new ResetPassToken()
+    const tokenTransaction = Database.transaction()
+
+    const userFound = await User.findByOrFail('email', email)
+    if (!userFound) {
+      return response.notFound({ message: 'No user was found with this email address.' })
+    }
+
+    try {
+      newToken.fill({ email })
+      newToken.useTransaction(await tokenTransaction)
+      await newToken.save()
+    } catch (error) {
+      ;(await tokenTransaction).rollback()
+      return response.badRequest({ message: 'Error in generating token.', error: error.message })
+    }
+
+    ;(await tokenTransaction).commit()
+
+    let tokenFound
+
+    try {
+      tokenFound = await ResetPassToken.query()
+        .where('email', newToken.email)
+        .orderBy('id', 'desc')
+        .first()
+    } catch (error) {
+      ;(await tokenTransaction).rollback()
+      return response.badRequest({ message: 'Error in finding new token.', error: error.message })
+    }
+
+    try {
+      await sendResetPasswordTokenMail(userFound, tokenFound, 'email/reset_password_token')
+    } catch (error) {
+      ;(await tokenTransaction).rollback()
+      return response.badRequest({ message: `Error in sending token email.`, error: error.message })
+    }
+
+    return response.ok({ token: tokenFound.token })
   }
 }
