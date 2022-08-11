@@ -1,7 +1,9 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Bet from 'App/Models/Bet'
+import User from 'App/Models/User'
 import { getBetTotalPrice, getCartMinValue, getGameId } from 'App/Services/BetsHelper'
+import { sendMail } from 'App/Services/sendMail'
 
 export default class BetsController {
   public async index({ response }: HttpContextContract) {
@@ -48,6 +50,14 @@ export default class BetsController {
         }
       })
     )
+
+    try {
+      const userFound = await User.findByOrFail('id', idOfuserWhoIsPlacingThisBet)
+      await sendMail(userFound, 'You just made a new bet!', 'email/new_bet')
+    } catch (error) {
+      ;(await betTransaction).rollback()
+      return response.badRequest({ message: 'Error in sending bet email.', error: error.message })
+    }
     ;(await betTransaction).commit()
 
     return response.ok('All bets were created successfully!')
