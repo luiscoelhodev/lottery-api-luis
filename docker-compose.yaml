@@ -1,0 +1,35 @@
+version: '3'
+
+networks:
+  luby:
+    external: true
+
+services:
+
+  lottery-api:
+    build:
+      context: .
+    ports:
+      - '3333:3333'
+    volumes:
+      - lottery:/usr/app
+    networks:
+      - luby
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tgl_lottery
+    ports:
+      - '3306:3306'
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - luby
+
+volumes:
+  db-data:
+  lottery:
