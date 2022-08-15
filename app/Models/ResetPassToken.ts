@@ -14,6 +14,9 @@ export default class ResetPassToken extends BaseModel {
   @column()
   public email: string
 
+  @column()
+  public used: boolean
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

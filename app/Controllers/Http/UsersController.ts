@@ -221,10 +221,16 @@ export default class UsersController {
       return response.badRequest({ error: `Your token has already expired!` })
     }
 
+    if (!!tokenFound.used === true) {
+      return response.forbidden({ error: `This token has already been used!` })
+    }
+
     try {
       const userFound = await User.findByOrFail('email', tokenFound.email)
       userFound.password = newPassword
+      tokenFound.used = true
       await userFound.save()
+      await tokenFound.save()
       return response.ok({ message: `Your password was reset! Please, log in.` })
     } catch (error) {
       return response.badRequest({ message: `Error in reseting password.`, error: error.message })
