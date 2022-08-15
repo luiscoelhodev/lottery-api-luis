@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Bet from 'App/Models/Bet'
@@ -32,7 +33,7 @@ export default class BetsController {
     }
 
     const newBet = new Bet()
-    const betTransaction = Database.transaction()
+    const betTransaction = await Database.transaction()
 
     await Promise.all(
       betArray.map(async (element) => {
@@ -42,10 +43,10 @@ export default class BetsController {
             newBet.gameId = await getGameId(element.game)
             newBet.numbers = element.numbers
           }
-          newBet.useTransaction(await betTransaction)
+          newBet.useTransaction(betTransaction)
           await newBet.save()
         } catch (error) {
-          ;(await betTransaction).rollback()
+          await betTransaction.rollback()
           return response.badRequest({ message: `Error in creating a bet.`, error: error.message })
         }
       })
@@ -55,12 +56,12 @@ export default class BetsController {
       const userFound = await User.findByOrFail('id', idOfuserWhoIsPlacingThisBet)
       await sendMail(userFound, 'You just made a new bet!', 'email/new_bet')
     } catch (error) {
-      ;(await betTransaction).rollback()
+      await betTransaction.rollback()
       return response.badRequest({ message: 'Error in sending bet email.', error: error.message })
     }
-    ;(await betTransaction).commit()
+    await betTransaction.commit()
 
-    return response.ok('All bets were created successfully!')
+    return response.ok({ message:'All bets were created successfully!' })
   }
 
   public async show({ params, response }: HttpContextContract) {

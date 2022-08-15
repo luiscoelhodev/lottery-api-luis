@@ -27,24 +27,23 @@ export default class GamesController {
     ])
 
     const game = new Game()
-    const gameTransaction = Database.transaction()
+    const gameTransaction = await Database.transaction()
 
     try {
       game.fill(gameBody)
-      game.useTransaction(await gameTransaction)
+      game.useTransaction(gameTransaction)
       await game.save()
     } catch (error) {
-      ;(await gameTransaction).rollback()
+      await gameTransaction.rollback()
       return response.badRequest({ message: `Error in creating game.`, error: error.message })
     }
 
-    ;(await gameTransaction).commit()
+    await gameTransaction.commit()
     let gameFound
 
     try {
       gameFound = await Game.query().where('id', game.id).first()
     } catch (error) {
-      ;(await gameTransaction).rollback()
       return response.notFound({ message: `Error in finding game.`, error: error.message })
     }
 
@@ -76,25 +75,24 @@ export default class GamesController {
     ])
 
     const gameToBeUpdated = await Game.findByOrFail('secure_id', gameSecureId)
-    const gameTransaction = Database.transaction()
+    const gameTransaction = await Database.transaction()
 
     try {
       gameToBeUpdated.merge(gameBody)
-      gameToBeUpdated.useTransaction(await gameTransaction)
+      gameToBeUpdated.useTransaction(gameTransaction)
       await gameToBeUpdated.save()
     } catch (error) {
-      ;(await gameTransaction).rollback()
+      await gameTransaction.rollback()
       return response.badRequest({ message: `Error in updating game.`, error: error.message })
     }
 
-    ;(await gameTransaction).commit()
+    await gameTransaction.commit()
 
     let gameFound
 
     try {
       gameFound = await Game.query().where('id', gameToBeUpdated.id).first()
     } catch (error) {
-      ;(await gameTransaction).rollback()
       return response.notFound({ message: `Error in finding game.`, error: error.message })
     }
 

@@ -25,38 +25,37 @@ export default class UsersController {
     const userBody = request.only(['name', 'cpf', 'email', 'password'])
 
     const user = new User()
-    const userTransaction = Database.transaction()
+    const userTransaction = await Database.transaction()
 
     try {
       user.fill(userBody)
-      user.useTransaction(await userTransaction)
+      user.useTransaction(userTransaction)
       await user.save()
 
       const playerRole = await Role.findBy('type', 'player')
       if (playerRole) await user.related('roles').attach([playerRole.id])
     } catch (error) {
-      ;(await userTransaction).rollback()
+      await userTransaction.rollback()
       return response.badRequest({ message: `Error in creating user.`, error: error.message })
     }
 
     try {
       await sendMail(user, 'Welcome to Lottery API!', 'email/welcome')
     } catch (error) {
-      ;(await userTransaction).rollback()
+      await userTransaction.rollback()
       return response.badRequest({
         message: `Error in sending welcome email.`,
         error: error.message,
       })
     }
 
-    ;(await userTransaction).commit()
+    await userTransaction.commit()
 
     let userFound
 
     try {
       userFound = await User.query().where('id', user.id).preload('roles').first()
     } catch (error) {
-      ;(await userTransaction).rollback()
       return response.notFound({
         message: `Error in finding this user created.`,
         error: error.message,
@@ -96,25 +95,24 @@ export default class UsersController {
     const userBody = request.only(['name', 'cpf', 'email', 'password'])
 
     const userToBeUpdated = await User.findByOrFail('secure_id', userSecureId)
-    const userTransaction = Database.transaction()
+    const userTransaction = await Database.transaction()
 
     try {
       userToBeUpdated.merge(userBody)
-      userToBeUpdated.useTransaction(await userTransaction)
+      userToBeUpdated.useTransaction(userTransaction)
       await userToBeUpdated.save()
     } catch (error) {
-      ;(await userTransaction).rollback()
+      await userTransaction.rollback()
       return response.badRequest({ message: `Error in updating user.`, error: error.message })
     }
 
-    ;(await userTransaction).commit()
+    await userTransaction.commit()
 
     let userFound
 
     try {
       userFound = await User.query().where('id', userToBeUpdated.id).preload('roles').first()
     } catch (error) {
-      ;(await userTransaction).rollback()
       return response.notFound({
         message: `Error in finding this user created.`,
         error: error.message,
@@ -172,7 +170,7 @@ export default class UsersController {
   public async generateAndSendResetPasswordToken({ request, response }: HttpContextContract) {
     const { email } = request.all()
     const newToken = new ResetPassToken()
-    const tokenTransaction = Database.transaction()
+    const tokenTransaction = await Database.transaction()
 
     const userFound = await User.findByOrFail('email', email)
     if (!userFound) {
@@ -181,14 +179,14 @@ export default class UsersController {
 
     try {
       newToken.fill({ email })
-      newToken.useTransaction(await tokenTransaction)
+      newToken.useTransaction(tokenTransaction)
       await newToken.save()
     } catch (error) {
-      ;(await tokenTransaction).rollback()
+      await tokenTransaction.rollback()
       return response.badRequest({ message: 'Error in generating token.', error: error.message })
     }
 
-    ;(await tokenTransaction).commit()
+    await tokenTransaction.commit()
 
     let tokenFound
 
@@ -198,14 +196,12 @@ export default class UsersController {
         .orderBy('id', 'desc')
         .first()
     } catch (error) {
-      ;(await tokenTransaction).rollback()
       return response.badRequest({ message: 'Error in finding new token.', error: error.message })
     }
 
     try {
       await sendResetPasswordTokenMail(userFound, tokenFound, 'email/reset_password_token')
     } catch (error) {
-      ;(await tokenTransaction).rollback()
       return response.badRequest({ message: `Error in sending token email.`, error: error.message })
     }
 
