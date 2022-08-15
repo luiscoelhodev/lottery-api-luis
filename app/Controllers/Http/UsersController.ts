@@ -230,4 +230,15 @@ export default class UsersController {
       return response.badRequest({ message: `Error in reseting password.`, error: error.message })
     }
   }
+
+  public async retrieveUsersInfo({ auth, response }: HttpContextContract) {
+    const userSecureId = auth.user?.secureId
+    let userFound
+    try {
+      userFound = await User.query().where('secure_id', userSecureId).preload('bets').first()
+    } catch (error) {
+      return response.notFound({ message: `Couldn't find user.`, error: error.message })
+    }
+    return response.ok({ userFound })
+  }
 }

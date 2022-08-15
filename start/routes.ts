@@ -58,6 +58,7 @@ Route.post('/user/reset-password', 'UsersController.validateTokenToResetPassword
 
 Route.group(() => {
   Route.resource('/users', 'UsersController').only(['update'])
+  Route.get('/users/my-account', 'UsersController.retrieveUsersInfo')
 }).middleware(['auth', 'is:player'])
 
 Route.group(() => {
