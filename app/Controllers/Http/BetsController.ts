@@ -28,7 +28,7 @@ export default class BetsController {
 
     if (minCartValue && betTotalPrice < minCartValue) {
       return response.badRequest({
-        message: `These bets don't meet the minimum cart price criteria.`,
+        message: `You haven't placed enough bets. The minimum value is ${minCartValue}!`,
       })
     }
 
