@@ -205,7 +205,7 @@ export default class UsersController {
       return response.badRequest({ message: `Error in sending token email.`, error: error.message })
     }
 
-    return response.ok({ token: tokenFound.token })
+    return response.ok({ message: 'The token was successfully sent to your email!' })
   }
 
   public async validateTokenToResetPassword({ request, response }: HttpContextContract) {
