@@ -62,7 +62,7 @@ export default class UsersController {
       })
     }
 
-    return response.ok({ userFound })
+    return response.created({ userFound })
   }
 
   public async show({ params, response }: HttpContextContract) {

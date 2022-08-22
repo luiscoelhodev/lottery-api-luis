@@ -93,6 +93,6 @@ test.group('User Store', (storeTest) => {
     })
 
     response.assertStatus(201)
-    response.assertBodyContains({ newUserFound: {} })
+    response.assertBodyContains({ userFound: {} })
   })
 })
