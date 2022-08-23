@@ -9,6 +9,7 @@ export default class UpdateValidator extends CustomMessages {
   }
 
   public schema = schema.create({
+    gameSecureId: schema.string({ escape: true, trim: true }, [rules.uuid({ version: '4' })]),
     type: schema.string.optional({ trim: true }, [
       rules.maxLength(25),
       rules.minLength(3),

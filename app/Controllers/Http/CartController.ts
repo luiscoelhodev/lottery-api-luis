@@ -8,11 +8,14 @@ export default class CartController {
       const cartInfo = await Cart.firstOrFail()
       response.ok(cartInfo)
     } catch (error) {
-      response.badRequest({ error: 'Error in finding cart data.' })
+      //Since we have a error parameter, we can also return the error message (if there is one) in the response.
+      response.badRequest({ error: 'Error in finding cart data.', message: error.message })
     }
   }
 
   public async update({ request, response }: HttpContextContract) {
+    // TODO: Needs to replace request.only(and further validations) with request.validate(CartValidator), this uses adonis validator.
+    // Doc: https://docs.adonisjs.com/guides/validator/introduction
     const newMinCartValue = request.only(['min_cart_value'])
     if (!newMinCartValue.min_cart_value || typeof newMinCartValue.min_cart_value !== 'number') {
       return response.badRequest({ error: `Invalid request data!` })

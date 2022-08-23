@@ -5,14 +5,17 @@ import ResetPassToken from 'App/Models/ResetPassToken'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
 import { sendMail, sendResetPasswordTokenMail } from 'App/Services/sendMail'
-import StoreValidator from 'App/Validators/User/StoreValidator'
-import UpdateValidator from 'App/Validators/User/UpdateValidator'
+import { UserStoreValidator, UserUpdateValidator } from 'App/Validators/UserValidator'
 import { DateTime } from 'luxon'
 
 export default class UsersController {
   public async index({ response }: HttpContextContract) {
     try {
       const allUsers = await User.all()
+      // allUsers array can be empty if no users are found, if it is, notifies the user
+      if (allUsers.length === 0) {
+        return response.notFound({ message: 'No users were found.' })
+      }
       return response.ok(allUsers)
     } catch (error) {
       return response.badRequest({ message: `Error in listing all users.`, error: error.message })
@@ -20,9 +23,7 @@ export default class UsersController {
   }
 
   public async store({ request, response }: HttpContextContract) {
-    await request.validate(StoreValidator)
-
-    const userBody = request.only(['name', 'cpf', 'email', 'password'])
+    const userBody = await request.validate(UserStoreValidator)
 
     const user = new User()
     const userTransaction = await Database.transaction()
@@ -66,6 +67,7 @@ export default class UsersController {
   }
 
   public async show({ params, response }: HttpContextContract) {
+    // TODO: Validate userSecureId
     const userSecureId = params.id
     const nowMinusOneMonth = DateTime.now()
       .setZone('America/Sao_Paulo')
@@ -88,11 +90,8 @@ export default class UsersController {
     }
   }
 
-  public async update({ params, request, response }: HttpContextContract) {
-    await request.validate(UpdateValidator)
-
-    const userSecureId = params.id
-    const userBody = request.only(['name', 'cpf', 'email', 'password'])
+  public async update({ request, response }: HttpContextContract) {
+    const { userSecureId, ...userBody } = await request.validate(UserUpdateValidator)
 
     const userToBeUpdated = await User.findByOrFail('secure_id', userSecureId)
     const userTransaction = await Database.transaction()
@@ -136,6 +135,7 @@ export default class UsersController {
   }
 
   public async grantPermission({ request, response }: HttpContextContract) {
+    // TODO: Use validator on request body
     const { user_id, roles } = request.all()
 
     try {
@@ -168,6 +168,7 @@ export default class UsersController {
   }
 
   public async generateAndSendResetPasswordToken({ request, response }: HttpContextContract) {
+    // TODO: Use validator on request body
     const { email } = request.all()
     const newToken = new ResetPassToken()
     const tokenTransaction = await Database.transaction()
