@@ -61,7 +61,7 @@ export default class BetsController {
     }
     await betTransaction.commit()
 
-    return response.ok({ message:'All bets were created successfully!' })
+    return response.created({ message:'All bets were created successfully!' })
   }
 
   public async show({ params, response }: HttpContextContract) {
