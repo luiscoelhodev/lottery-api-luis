@@ -74,6 +74,19 @@ export default class GamesController {
       'color',
     ])
 
+    if (
+      !gameBody.type &&
+      !gameBody.description &&
+      !gameBody.range &&
+      !gameBody.price &&
+      !gameBody.color &&
+      !gameBody.min_and_max_number)
+    {
+      return response.badRequest({
+        error: 'Game was not updated because no values were specified. ',
+      })
+    }
+
     const gameToBeUpdated = await Game.findByOrFail('secure_id', gameSecureId)
     const gameTransaction = await Database.transaction()
 
