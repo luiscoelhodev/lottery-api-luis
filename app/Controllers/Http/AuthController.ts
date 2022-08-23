@@ -1,9 +1,12 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
 import Env from '@ioc:Adonis/Core/Env'
+import LoginValidator from 'App/Validators/Auth/LoginValidator'
 
 export default class AuthController {
   public async login({ auth, request, response }: HttpContextContract) {
+    await request.validate(LoginValidator)
+
     const { email, password } = request.all()
     const user = await User.query().where('email', email).preload('roles').first()
 
