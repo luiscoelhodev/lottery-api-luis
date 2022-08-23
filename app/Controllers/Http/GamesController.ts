@@ -47,7 +47,7 @@ export default class GamesController {
       return response.notFound({ message: `Error in finding game.`, error: error.message })
     }
 
-    return response.ok({ gameFound })
+    return response.created({ gameFound })
   }
 
   public async show({ params, response }: HttpContextContract) {
