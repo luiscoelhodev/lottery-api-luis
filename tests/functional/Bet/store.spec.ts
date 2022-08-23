@@ -9,6 +9,7 @@ test.group('Bet store', async (storeTest) => {
     await Database.beginGlobalTransaction()
     return () => Database.rollbackGlobalTransaction()
   })
+  const adminUser = await User.findOrFail(1)
   const playerUser = await User.findOrFail(2)
   const minCartValue = (await Cart.findOrFail(1)).minCartValue
 
@@ -18,6 +19,37 @@ test.group('Bet store', async (storeTest) => {
     response.assertStatus(400)
     response.assertBodyContains({
       message: `You haven't placed enough bets. The minimum value is ${minCartValue}!`,
+    })
+  })
+
+  test('random bet array above maximum price should be stored', async ({ client }) => {
+    const response = await client.post('/bets').json(generateRandomBetArray(5)).loginAs(playerUser)
+
+    response.assertStatus(201)
+    response.assertBodyContains({
+      message: 'All bets were created successfully!',
+    })
+  })
+
+  test('provided token, but without the necessary permission', async ({ client }) => {
+    const response = await client.post('/bets').json(generateRandomBetArray(5)).loginAs(adminUser)
+
+    response.assertStatus(403)
+    response.assertBodyContains({
+      message: 'User not authorized.',
+    })
+  })
+
+  test('no token provided (user not logged in)', async ({ client }) => {
+    const response = await client.post('/bets').json(generateRandomBetArray(5))
+
+    response.assertStatus(401)
+    response.assertBodyContains({
+      errors: [
+        {
+          message: 'E_UNAUTHORIZED_ACCESS: Unauthorized access',
+        },
+      ],
     })
   })
 })
