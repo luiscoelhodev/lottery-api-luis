@@ -10,6 +10,10 @@ export default class BetsController {
   public async index({ response }: HttpContextContract) {
     try {
       const allBets = await Bet.all()
+      // allBets array can be empty if no bets were found, so we need to check for that and return a proper response.
+      if (allBets.length === 0) {
+        return response.notFound({ message: 'No bets found.' })
+      }
       response.ok(allBets)
     } catch (error) {
       response.badRequest({ message: 'Error in listing all bets.', error: error.message })
@@ -61,14 +65,14 @@ export default class BetsController {
     }
     await betTransaction.commit()
 
-    return response.ok({ message:'All bets were created successfully!' })
+    return response.ok({ message: 'All bets were created successfully!' })
   }
 
   public async show({ params, response }: HttpContextContract) {
     const betId = params.id
 
     try {
-      const betFound = await Bet.findByOrFail('id', betId)
+      const betFound = await Bet.findOrFail(betId)
       response.ok({ betFound })
     } catch (error) {
       response.badRequest({ message: 'Bet not found.', error: error.message })
