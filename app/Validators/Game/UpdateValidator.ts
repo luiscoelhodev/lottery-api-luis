@@ -12,7 +12,7 @@ export default class UpdateValidator extends CustomMessages {
     type: schema.string.optional({ trim: true }, [
       rules.maxLength(25),
       rules.minLength(3),
-      rules.regex(/^[ a-zA-ZÀ-ÿ\u00f1\u00d1]*$/g),
+      rules.regex(/^[ a-zA-ZÀ-ÿ\u00f1\u00d1\-]*$/g),
     ]),
     description: schema.string.optional({ trim: true }),
     range: schema.number.optional([rules.unsigned()]),
