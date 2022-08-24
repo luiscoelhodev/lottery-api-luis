@@ -176,7 +176,7 @@ export default class UsersController {
     const { email } = await request.validate(GetResetTokenValidator)
     const newToken = new ResetPassToken()
     const tokenTransaction = await Database.transaction()
-    let userFound
+    let userFound: User
     try {
       userFound = await User.findByOrFail('email', email)
     } catch (error) {
@@ -197,13 +197,13 @@ export default class UsersController {
 
     await tokenTransaction.commit()
 
-    let tokenFound
+    let tokenFound: ResetPassToken
 
     try {
       tokenFound = await ResetPassToken.query()
         .where('email', newToken.email)
         .orderBy('id', 'desc')
-        .first()
+        .firstOrFail()
     } catch (error) {
       return response.badRequest({ message: 'Error in finding new token.', error: error.message })
     }
