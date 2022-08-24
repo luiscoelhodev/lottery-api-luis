@@ -9,7 +9,7 @@ export default class ResetPasswordValidator extends CustomMessages {
   }
 
   public schema = schema.create({
-    token: schema.string({ trim: true }, [rules.minLength(63), rules.maxLength(63)]),
+    token: schema.string({ trim: true }, [rules.minLength(36), rules.maxLength(36)]),
     newPassword: schema.string({}, [rules.maxLength(50)]),
   })
 }
