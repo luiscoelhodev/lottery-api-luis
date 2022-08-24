@@ -53,7 +53,13 @@ test.group('User login', (loginTest) => {
       .json({ email: 'usernotregistered@email.com', password: '123456' })
 
     response.assertStatus(401)
-    response.assertBodyContains({ message: 'Invalid credentials' })
+    response.assertBody({
+      message: 'Invalid credentials',
+      error: {
+        responseText: 'E_INVALID_AUTH_UID: User not found',
+        guard: 'api',
+      },
+    })
   })
 
   test('user logs in successfully', async ({ client }) => {

@@ -16,17 +16,19 @@ test.group('Bet store', async (storeTest) => {
   test('random bet array below minimum price should not be stored', async ({ client }) => {
     const response = await client.post('/bets').json(generateRandomBetArray(2)).loginAs(playerUser)
 
+    console.log('response above min price', response)
     response.assertStatus(400)
-    response.assertBodyContains({
+    response.assertBody({
       message: `You haven't placed enough bets. The minimum value is ${minCartValue}!`,
     })
   })
 
-  test('random bet array above maximum price should be stored', async ({ client }) => {
+  test('random bet array above minimum price should be stored', async ({ client }) => {
     const response = await client.post('/bets').json(generateRandomBetArray(5)).loginAs(playerUser)
 
+    console.log('response above min price', response)
     response.assertStatus(201)
-    response.assertBodyContains({
+    response.assertBody({
       message: 'All bets were created successfully!',
     })
   })
@@ -35,7 +37,7 @@ test.group('Bet store', async (storeTest) => {
     const response = await client.post('/bets').json(generateRandomBetArray(5)).loginAs(adminUser)
 
     response.assertStatus(403)
-    response.assertBodyContains({
+    response.assertBody({
       message: 'User not authorized.',
     })
   })
@@ -44,7 +46,7 @@ test.group('Bet store', async (storeTest) => {
     const response = await client.post('/bets').json(generateRandomBetArray(5))
 
     response.assertStatus(401)
-    response.assertBodyContains({
+    response.assertBody({
       errors: [
         {
           message: 'E_UNAUTHORIZED_ACCESS: Unauthorized access',

@@ -11,6 +11,7 @@ test.group('User Store', (storeTest) => {
     const response = await client.post('/users')
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
 
   test('name missing in request body', async ({ client }) => {
@@ -19,6 +20,7 @@ test.group('User Store', (storeTest) => {
       .json({ cpf: '111.222.333-00', email: 'email@email.com', password: '123456' })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
 
   test('cpf missing in request body', async ({ client }) => {
@@ -27,6 +29,7 @@ test.group('User Store', (storeTest) => {
       .json({ name: 'Test User', email: 'email@email.com', password: '123456' })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
   test('email missing in request body', async ({ client }) => {
     const response = await client
@@ -34,6 +37,7 @@ test.group('User Store', (storeTest) => {
       .json({ name: 'Test User', cpf: '111.222.333-00', password: '123456' })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
   test('password missing in request body', async ({ client }) => {
     const response = await client
@@ -41,6 +45,7 @@ test.group('User Store', (storeTest) => {
       .json({ name: 'Test User', email: 'email@email.com', cpf: '111.222.333-00' })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
 
   test('name should be valid', async ({ client }) => {
@@ -52,6 +57,7 @@ test.group('User Store', (storeTest) => {
     })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
   test('cpf should be valid', async ({ client }) => {
     const response = await client.post('/users').json({
@@ -62,6 +68,7 @@ test.group('User Store', (storeTest) => {
     })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
   test('email should be valid', async ({ client }) => {
     const response = await client.post('/users').json({
@@ -72,6 +79,7 @@ test.group('User Store', (storeTest) => {
     })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
   test('password should be valid', async ({ client }) => {
     const response = await client.post('/users').json({
@@ -82,6 +90,7 @@ test.group('User Store', (storeTest) => {
     })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [] })
   })
 
   test('user should be created if all request info is valid', async ({ client }) => {

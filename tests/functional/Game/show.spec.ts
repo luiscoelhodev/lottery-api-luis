@@ -16,7 +16,7 @@ test.group('Game show', async (showTest) => {
     const response = await client.get(`/games/${gameSecureId}`)
 
     response.assertStatus(401)
-    response.assertBodyContains({
+    response.assertBody({
       errors: [
         {
           message: 'E_UNAUTHORIZED_ACCESS: Unauthorized access',
@@ -29,7 +29,7 @@ test.group('Game show', async (showTest) => {
     const response = await client.get(`/games/${gameSecureId}`).loginAs(playerUser)
 
     response.assertStatus(403)
-    response.assertBodyContains({
+    response.assertBody({
       message: 'User not authorized.',
     })
   })

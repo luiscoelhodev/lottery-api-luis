@@ -24,7 +24,7 @@ test.group('Game update', async (updateTest) => {
     })
 
     response.assertStatus(401)
-    response.assertBodyContains({
+    response.assertBody({
       errors: [
         {
           message: 'E_UNAUTHORIZED_ACCESS: Unauthorized access',
@@ -47,7 +47,7 @@ test.group('Game update', async (updateTest) => {
       .loginAs(playerUser)
 
     response.assertStatus(403)
-    response.assertBodyContains({
+    response.assertBody({
       message: 'User not authorized.',
     })
   })
@@ -56,7 +56,7 @@ test.group('Game update', async (updateTest) => {
     const response = await client.put(`/games/${gameSecureId}`).json({}).loginAs(adminUser)
 
     response.assertStatus(400)
-    response.assertBodyContains({
+    response.assertBody({
       error: 'Game was not updated because no values were specified. ',
     })
   })

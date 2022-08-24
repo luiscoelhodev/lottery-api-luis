@@ -22,7 +22,7 @@ test.group('Game store', async (storeTest) => {
     })
 
     response.assertStatus(401)
-    response.assertBodyContains({
+    response.assertBody({
       errors: [
         {
           message: 'E_UNAUTHORIZED_ACCESS: Unauthorized access',
@@ -45,7 +45,7 @@ test.group('Game store', async (storeTest) => {
       .loginAs(playerUser)
 
     response.assertStatus(403)
-    response.assertBodyContains({
+    response.assertBody({
       message: 'User not authorized.',
     })
   })

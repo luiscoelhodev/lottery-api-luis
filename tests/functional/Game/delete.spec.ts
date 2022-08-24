@@ -16,7 +16,7 @@ test.group('Game delete', async (deleteTest) => {
     const response = await client.delete(`/games/${gameSecureId}`)
 
     response.assertStatus(401)
-    response.assertBodyContains({
+    response.assertBody({
       errors: [
         {
           message: 'E_UNAUTHORIZED_ACCESS: Unauthorized access',
@@ -29,7 +29,7 @@ test.group('Game delete', async (deleteTest) => {
     const response = await client.delete(`/games/${gameSecureId}`).loginAs(playerUser)
 
     response.assertStatus(403)
-    response.assertBodyContains({
+    response.assertBody({
       message: 'User not authorized.',
     })
   })
@@ -38,7 +38,7 @@ test.group('Game delete', async (deleteTest) => {
     const response = await client.delete(`/games/${gameSecureId}`).loginAs(adminUser)
 
     response.assertStatus(200)
-    response.assertBodyContains({
+    response.assertBody({
       message: 'Game was successfully deleted!',
     })
   })
