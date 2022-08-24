@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
+
 import ResetPassToken from 'App/Models/ResetPassToken'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
+
 import { sendMail, sendResetPasswordTokenMail } from 'App/Services/sendMail'
 import StoreValidator from 'App/Validators/User/StoreValidator'
 import UpdateValidator from 'App/Validators/User/UpdateValidator'
+import GetResetTokenValidator from 'App/Validators/Auth/GetResetTokenValidator'
+import ResetPasswordValidator from 'App/Validators/Auth/ResetPasswordValidator'
+
 import { DateTime } from 'luxon'
 
 export default class UsersController {
@@ -168,13 +173,17 @@ export default class UsersController {
   }
 
   public async generateAndSendResetPasswordToken({ request, response }: HttpContextContract) {
-    const { email } = request.all()
+    const { email } = await request.validate(GetResetTokenValidator)
     const newToken = new ResetPassToken()
     const tokenTransaction = await Database.transaction()
-
-    const userFound = await User.findByOrFail('email', email)
-    if (!userFound) {
-      return response.notFound({ message: 'No user was found with this email address.' })
+    let userFound
+    try {
+      userFound = await User.findByOrFail('email', email)
+    } catch (error) {
+      return response.badRequest({
+        message: 'Error in finding an user with this email.',
+        error: error.message,
+      })
     }
 
     try {
@@ -209,14 +218,20 @@ export default class UsersController {
   }
 
   public async validateTokenToResetPassword({ request, response }: HttpContextContract) {
-    const { token, newPassword } = request.all()
+    const { token, newPassword } = await request.validate(ResetPasswordValidator)
     const nowMinus30Mins = DateTime.now()
       .setZone('America/Sao_Paulo')
       .setLocale('pt-br')
       .minus({ minutes: 30 })
       .toSQL()
 
-    const tokenFound = await ResetPassToken.findByOrFail('token', token)
+    let tokenFound
+    try {
+      tokenFound = await ResetPassToken.findByOrFail('token', token)
+    } catch (error) {
+      return response.badRequest({ message: 'Error in finding this token.', error: error.message })
+    }
+
     if (tokenFound.createdAt.toSQL() < nowMinus30Mins) {
       return response.badRequest({ error: `Your token has already expired!` })
     }
