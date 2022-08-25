@@ -12,21 +12,27 @@ test.group('User reset password', (resetPasswordTest) => {
     return () => Database.rollbackGlobalTransaction()
   })
 
-  test('request body is empty', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if request body is empty', async ({
+    client,
+  }) => {
     const response = await client.post('/user/reset-password')
 
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
 
-  test('token is missing in request body', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if token is missing in request body', async ({
+    client,
+  }) => {
     const response = await client.post('/user/reset-password').json({ newPassword: 'newP@ss' })
 
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
 
-  test('newPassword is missing in request body', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if newPassword is missing in request body', async ({
+    client,
+  }) => {
     const response = await client
       .post('/user/reset-password')
       .json({ token: '5595ce24-89e3-4282-88c9-3f027d907a86' })
@@ -35,7 +41,9 @@ test.group('User reset password', (resetPasswordTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('token is not valid (length is not 36)', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if token is not valid (length is not 36)', async ({
+    client,
+  }) => {
     const response = await client
       .post('/user/reset-password')
       .json({ token: '59ce2-8e3-4282-88c9', newPassword: 'newP@ss' })
@@ -44,7 +52,9 @@ test.group('User reset password', (resetPasswordTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('newPassword is not valid (too long)', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if newPassword is not valid (too long)', async ({
+    client,
+  }) => {
     const response = await client.post('/user/reset-password').json({
       token: '5595ce24-89e3-4282-88c9-3f027d907a86',
       newPassword: 'qwertyuiopasdfghjklçzxcvbnm1234567890qwertyuiopasdfg',
@@ -54,18 +64,21 @@ test.group('User reset password', (resetPasswordTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('token has already expired (30+ minutes have passed)', async ({ client }) => {
+  test('should return request error and status code 400(Bad request) if token has already expired', async ({
+    client,
+  }) => {
     const expiredToken = await generateExpiredToken('player@email.com')
     const response = await client
       .post('/user/reset-password')
       .json({ token: expiredToken, newPassword: '12345678' })
 
-    console.log(response)
     response.assertStatus(400)
     response.assertBody({ error: `Your token has already expired!` })
   })
 
-  test('token does not exist', async ({ client }) => {
+  test('should return request error and status code 400(Bad request) if token does not exist', async ({
+    client,
+  }) => {
     const response = await client.post('/user/reset-password').json({
       token: '5595ce24-89e3-4282-88c9-3f027d907a86',
       newPassword: '123456',
@@ -78,7 +91,9 @@ test.group('User reset password', (resetPasswordTest) => {
     })
   })
 
-  test('token has already been used', async ({ client }) => {
+  test('should return request error and status code 403(Forbidden) if token has already been used', async ({
+    client,
+  }) => {
     const usedToken = await generateUsedToken('player@email.com')
     const response = await client
       .post('/user/reset-password')
@@ -90,7 +105,9 @@ test.group('User reset password', (resetPasswordTest) => {
     })
   })
 
-  test('token and newPassword are valid, password should be updated', async ({ client }) => {
+  test('should return a success status code 200(Ok) if token and newPassword are valid, so password should be updated', async ({
+    client,
+  }) => {
     const validToken = await generateValidToken('player@email.com')
     const response = await client
       .post('user/reset-password')

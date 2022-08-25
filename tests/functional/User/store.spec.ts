@@ -7,14 +7,18 @@ test.group('User Store', (storeTest) => {
     return () => Database.rollbackGlobalTransaction()
   })
 
-  test('no request body', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if no request body is sent', async ({
+    client,
+  }) => {
     const response = await client.post('/users')
 
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
 
-  test('name missing in request body', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if name is missing in request body', async ({
+    client,
+  }) => {
     const response = await client
       .post('/users')
       .json({ cpf: '111.222.333-00', email: 'email@email.com', password: '123456' })
@@ -23,7 +27,9 @@ test.group('User Store', (storeTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('cpf missing in request body', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if cpf is missing in request body', async ({
+    client,
+  }) => {
     const response = await client
       .post('/users')
       .json({ name: 'Test User', email: 'email@email.com', password: '123456' })
@@ -31,7 +37,9 @@ test.group('User Store', (storeTest) => {
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
-  test('email missing in request body', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if email is missing in request body', async ({
+    client,
+  }) => {
     const response = await client
       .post('/users')
       .json({ name: 'Test User', cpf: '111.222.333-00', password: '123456' })
@@ -39,7 +47,9 @@ test.group('User Store', (storeTest) => {
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
-  test('password missing in request body', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if password is missing in request body', async ({
+    client,
+  }) => {
     const response = await client
       .post('/users')
       .json({ name: 'Test User', email: 'email@email.com', cpf: '111.222.333-00' })
@@ -48,7 +58,9 @@ test.group('User Store', (storeTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('name should be valid', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if name is invalid', async ({
+    client,
+  }) => {
     const response = await client.post('/users').json({
       name: 'Test User 123',
       email: 'email@email.com',
@@ -59,7 +71,9 @@ test.group('User Store', (storeTest) => {
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
-  test('cpf should be valid', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if cpf is invalid', async ({
+    client,
+  }) => {
     const response = await client.post('/users').json({
       name: 'Test User',
       email: 'email@email.com',
@@ -70,7 +84,9 @@ test.group('User Store', (storeTest) => {
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
-  test('email should be valid', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if email is invalid', async ({
+    client,
+  }) => {
     const response = await client.post('/users').json({
       name: 'Test User',
       email: 'email.email.com',
@@ -81,7 +97,9 @@ test.group('User Store', (storeTest) => {
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
-  test('password should be valid', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if password is invalid', async ({
+    client,
+  }) => {
     const response = await client.post('/users').json({
       name: 'Test User',
       email: 'email@email.com',
@@ -93,7 +111,9 @@ test.group('User Store', (storeTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('user should be created if all request info is valid', async ({ client }) => {
+  test('should return a success status code 201(Created) if all request info is valid', async ({
+    client,
+  }) => {
     const response = await client.post('/users').json({
       name: 'Test User',
       cpf: '111.222.333-00',

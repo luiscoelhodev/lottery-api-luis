@@ -7,14 +7,18 @@ test.group('User get reset password token', (getResetPasswordTokenTest) => {
     return () => Database.rollbackGlobalTransaction()
   })
 
-  test('no request body', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if no request body is sent', async ({
+    client,
+  }) => {
     const response = await client.post('/user/get-reset-password-token')
 
     response.assertStatus(422)
     response.assertBodyContains({ errors: [] })
   })
 
-  test('email is invalid', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if email is invalid', async ({
+    client,
+  }) => {
     const response = await client
       .post('/user/get-reset-password-token')
       .json({ email: 'testuser.email.com ' })
@@ -23,7 +27,9 @@ test.group('User get reset password token', (getResetPasswordTokenTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('user is not registered', async ({ client }) => {
+  test('should return request error and status code 400(Bad request) if user is not registered', async ({
+    client,
+  }) => {
     const response = await client
       .post('/user/get-reset-password-token')
       .json({ email: 'iamnotregistered@email.com' })
@@ -35,7 +41,9 @@ test.group('User get reset password token', (getResetPasswordTokenTest) => {
     })
   })
 
-  test('user is registered and email is valid, should return token', async ({ client }) => {
+  test('should return a success status code 200(Ok) if user is registered and email is valid, token is sent to their email', async ({
+    client,
+  }) => {
     const response = await client
       .post('/user/get-reset-password-token')
       .json({ email: 'player@email.com' })
