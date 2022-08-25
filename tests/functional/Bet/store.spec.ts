@@ -13,7 +13,9 @@ test.group('Bet store', async (storeTest) => {
   const playerUser = await User.findOrFail(2)
   const minCartValue = (await Cart.findOrFail(1)).minCartValue
 
-  test('random bet array below minimum price should not be stored', async ({ client }) => {
+  test('should return request error and status code 400(Bad request) if random bet array does not reach minimum cart value, so bets should not be stored', async ({
+    client,
+  }) => {
     const response = await client.post('/bets').json(generateRandomBetArray(2)).loginAs(playerUser)
 
     response.assertStatus(400)
@@ -22,7 +24,9 @@ test.group('Bet store', async (storeTest) => {
     })
   })
 
-  test('random bet array above minimum price should be stored', async ({ client }) => {
+  test('should return success status code 201(Created) if random bet array meets minimum cart value criteria, so bets should be stored', async ({
+    client,
+  }) => {
     const response = await client.post('/bets').json(generateRandomBetArray(5)).loginAs(playerUser)
 
     response.assertStatus(201)
@@ -31,7 +35,9 @@ test.group('Bet store', async (storeTest) => {
     })
   })
 
-  test('provided token, but without the necessary permission', async ({ client }) => {
+  test('should return request error and status code 403(Forbidden) if provided token, but without the necessary permission', async ({
+    client,
+  }) => {
     const response = await client.post('/bets').json(generateRandomBetArray(5)).loginAs(adminUser)
 
     response.assertStatus(403)
@@ -40,7 +46,9 @@ test.group('Bet store', async (storeTest) => {
     })
   })
 
-  test('no token provided (user not logged in)', async ({ client }) => {
+  test('should return request error and status code 401(Unauthorized) if no token was provided (user not logged in)', async ({
+    client,
+  }) => {
     const response = await client.post('/bets').json(generateRandomBetArray(5))
 
     response.assertStatus(401)
