@@ -16,7 +16,6 @@ test.group('Bet store', async (storeTest) => {
   test('random bet array below minimum price should not be stored', async ({ client }) => {
     const response = await client.post('/bets').json(generateRandomBetArray(2)).loginAs(playerUser)
 
-    console.log('response above min price', response)
     response.assertStatus(400)
     response.assertBody({
       message: `You haven't placed enough bets. The minimum value is ${minCartValue}!`,
@@ -26,7 +25,6 @@ test.group('Bet store', async (storeTest) => {
   test('random bet array above minimum price should be stored', async ({ client }) => {
     const response = await client.post('/bets').json(generateRandomBetArray(5)).loginAs(playerUser)
 
-    console.log('response above min price', response)
     response.assertStatus(201)
     response.assertBody({
       message: 'All bets were created successfully!',

@@ -12,7 +12,9 @@ test.group('Game show', async (showTest) => {
   const adminUser = await User.findOrFail(1)
   const playerUser = await User.findOrFail(2)
 
-  test('no token was provided in the request', async ({ client }) => {
+  test('should return request error and status code 401(Unauthorized) if no token was provided in the request', async ({
+    client,
+  }) => {
     const response = await client.get(`/games/${gameSecureId}`)
 
     response.assertStatus(401)
@@ -25,7 +27,9 @@ test.group('Game show', async (showTest) => {
     })
   })
 
-  test('provided token, but without permission for this route', async ({ client }) => {
+  test('should return request error and status code 403(Forbidden) if provided token, but without permission for this route', async ({
+    client,
+  }) => {
     const response = await client.get(`/games/${gameSecureId}`).loginAs(playerUser)
 
     response.assertStatus(403)
@@ -34,7 +38,9 @@ test.group('Game show', async (showTest) => {
     })
   })
 
-  test('provided admin token, should return game successfully', async ({ client }) => {
+  test('should return a success status code 200(Ok) if provided admin token, so it should return game successfully in response body', async ({
+    client,
+  }) => {
     const response = await client.get(`/games/${gameSecureId}`).loginAs(adminUser)
 
     response.assertStatus(200)

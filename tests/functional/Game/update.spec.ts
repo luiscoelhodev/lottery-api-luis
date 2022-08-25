@@ -13,7 +13,9 @@ test.group('Game update', async (updateTest) => {
   const playerUser = await User.findOrFail(2)
   const gameSecureId = await (await Game.findOrFail(1)).secureId
 
-  test('no token provided', async ({ client }) => {
+  test('should return request error and status code 401 if no token is provided', async ({
+    client,
+  }) => {
     const response = await client.put(`/games/${gameSecureId}`).json({
       type: 'Test Game',
       description: 'This is a test description',
@@ -33,7 +35,9 @@ test.group('Game update', async (updateTest) => {
     })
   })
 
-  test('provided token, but without permission for this route', async ({ client }) => {
+  test('should return request error and status code 403(Forbidden) if provided token, but without permission for this route', async ({
+    client,
+  }) => {
     const response = await client
       .put(`/games/${gameSecureId}`)
       .json({
@@ -52,7 +56,9 @@ test.group('Game update', async (updateTest) => {
     })
   })
 
-  test('admin token provided, but no request body was sent', async ({ client }) => {
+  test('should return request error and status code 400(Bad request) if admin token was provided, but no request body was sent', async ({
+    client,
+  }) => {
     const response = await client.put(`/games/${gameSecureId}`).json({}).loginAs(adminUser)
 
     response.assertStatus(400)
@@ -61,7 +67,9 @@ test.group('Game update', async (updateTest) => {
     })
   })
 
-  test('admin token provided, but type is invalid', async ({ client }) => {
+  test('should return validation error and status code 422(Unprocessable Entity) if admin token was provided, but type is invalid', async ({
+    client,
+  }) => {
     const response = await client
       .put(`/games/${gameSecureId}`)
       .json({
@@ -78,7 +86,7 @@ test.group('Game update', async (updateTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('admin token provided, but range, price and min_and_max_number are invalid', async ({
+  test('should return validation error and status code 422(Unprocessable Entity) if admin token was provided, but range, price and min_and_max_number are invalid', async ({
     client,
   }) => {
     const response = await client
@@ -97,7 +105,7 @@ test.group('Game update', async (updateTest) => {
     response.assertBodyContains({ errors: [] })
   })
 
-  test('admin token provided and all fields are valid so user should be updated successfully', async ({
+  test('should return success status code 200(Ok) if admin token provided and all fields are valid so user should be updated successfully', async ({
     client,
   }) => {
     const response = await client
