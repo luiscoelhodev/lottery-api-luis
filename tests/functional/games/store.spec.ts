@@ -2,14 +2,12 @@ import Database from '@ioc:Adonis/Lucid/Database'
 import { test } from '@japa/runner'
 import User from 'App/Models/User'
 
-test.group('Game store', async (storeTest) => {
+test.group('Game store', (storeTest) => {
+  storeTest.tap((test) => test.tags(['@game', '@gameStore']))
   storeTest.each.setup(async () => {
     await Database.beginGlobalTransaction()
     return () => Database.rollbackGlobalTransaction()
   })
-
-  const adminUser = await User.findOrFail(1)
-  const playerUser = await User.findOrFail(2)
 
   test('should return request error and status code 401(Unauthorized) if no token is provided', async ({
     client,
@@ -36,6 +34,7 @@ test.group('Game store', async (storeTest) => {
   test('should return request error and status code 403(Forbidden) if user does not have permission to access this route', async ({
     client,
   }) => {
+    const playerUser = await User.findOrFail(2)
     const response = await client
       .post('/games')
       .json({
@@ -57,6 +56,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but type is missing in request body', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -75,6 +75,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but description is missing in request body', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -93,6 +94,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but range is missing in request body', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -111,6 +113,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but price is missing in request body', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -129,6 +132,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but min_and_max_number is missing in request body', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -147,6 +151,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but color is missing in request body', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -165,6 +170,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but this type already exists', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -184,6 +190,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but type is invalid', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -203,6 +210,7 @@ test.group('Game store', async (storeTest) => {
   test('should return validation error and status code 422(Unprocessable Entity) if admin token is provided, but range, price and min_and_max_number are invalid', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({
@@ -222,6 +230,7 @@ test.group('Game store', async (storeTest) => {
   test('should return a success status code 201(Created) if provided admin token and all fields are valid, so it should store game successfully ', async ({
     client,
   }) => {
+    const adminUser = await User.findOrFail(1)
     const response = await client
       .post('/games')
       .json({

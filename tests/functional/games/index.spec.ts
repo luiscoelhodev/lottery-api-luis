@@ -1,21 +1,18 @@
 import Database from '@ioc:Adonis/Lucid/Database'
 import { test } from '@japa/runner'
-import Game from 'App/Models/Game'
 import User from 'App/Models/User'
 
-test.group('Game delete', async (deleteTest) => {
-  deleteTest.each.setup(async () => {
+test.group('Game index', (indexTest) => {
+  indexTest.tap((test) => test.tags(['@game', '@gameIndex']))
+  indexTest.each.setup(async () => {
     await Database.beginGlobalTransaction()
     return () => Database.rollbackGlobalTransaction()
   })
-  const gameSecureId = await (await Game.findOrFail(3)).secureId
-  const adminUser = await User.findOrFail(1)
-  const playerUser = await User.findOrFail(2)
 
   test('should return request error and status code 401(Unauthorized) if no token was provided in the request', async ({
     client,
   }) => {
-    const response = await client.delete(`/games/${gameSecureId}`)
+    const response = await client.get(`/games`)
 
     response.assertStatus(401)
     response.assertBody({
@@ -30,7 +27,8 @@ test.group('Game delete', async (deleteTest) => {
   test('should return request error and status code 403(Forbidden) if provided token, but without permission for this route', async ({
     client,
   }) => {
-    const response = await client.delete(`/games/${gameSecureId}`).loginAs(playerUser)
+    const playerUser = await User.findOrFail(2)
+    const response = await client.get(`/games`).loginAs(playerUser)
 
     response.assertStatus(403)
     response.assertBody({
@@ -38,14 +36,13 @@ test.group('Game delete', async (deleteTest) => {
     })
   })
 
-  test('should return success status code 200(Ok) if provided admin token, so game should be deleted successfully', async ({
+  test('should return success status code 200(Ok) if provided admin token,so it should return all games successfully in response body', async ({
     client,
   }) => {
-    const response = await client.delete(`/games/${gameSecureId}`).loginAs(adminUser)
+    const adminUser = await User.findOrFail(1)
+    const response = await client.get(`/games`).loginAs(adminUser)
 
     response.assertStatus(200)
-    response.assertBody({
-      message: 'Game was successfully deleted!',
-    })
+    response.assertBodyContains([])
   })
 })

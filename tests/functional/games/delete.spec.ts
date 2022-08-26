@@ -3,19 +3,18 @@ import { test } from '@japa/runner'
 import Game from 'App/Models/Game'
 import User from 'App/Models/User'
 
-test.group('Game show', async (showTest) => {
-  showTest.each.setup(async () => {
+test.group('Game delete', (deleteTest) => {
+  deleteTest.tap((test) => test.tags(['@game', '@gameDelete']))
+  deleteTest.each.setup(async () => {
     await Database.beginGlobalTransaction()
     return () => Database.rollbackGlobalTransaction()
   })
-  const gameSecureId = await (await Game.findOrFail(1)).secureId
-  const adminUser = await User.findOrFail(1)
-  const playerUser = await User.findOrFail(2)
 
   test('should return request error and status code 401(Unauthorized) if no token was provided in the request', async ({
     client,
   }) => {
-    const response = await client.get(`/games/${gameSecureId}`)
+    const gameSecureId = await (await Game.findOrFail(3)).secureId
+    const response = await client.delete(`/games/${gameSecureId}`)
 
     response.assertStatus(401)
     response.assertBody({
@@ -30,7 +29,9 @@ test.group('Game show', async (showTest) => {
   test('should return request error and status code 403(Forbidden) if provided token, but without permission for this route', async ({
     client,
   }) => {
-    const response = await client.get(`/games/${gameSecureId}`).loginAs(playerUser)
+    const gameSecureId = await (await Game.findOrFail(3)).secureId
+    const playerUser = await User.findOrFail(2)
+    const response = await client.delete(`/games/${gameSecureId}`).loginAs(playerUser)
 
     response.assertStatus(403)
     response.assertBody({
@@ -38,12 +39,16 @@ test.group('Game show', async (showTest) => {
     })
   })
 
-  test('should return a success status code 200(Ok) if provided admin token, so it should return game successfully in response body', async ({
+  test('should return success status code 200(Ok) if provided admin token, so game should be deleted successfully', async ({
     client,
   }) => {
-    const response = await client.get(`/games/${gameSecureId}`).loginAs(adminUser)
+    const gameSecureId = await (await Game.findOrFail(3)).secureId
+    const adminUser = await User.findOrFail(1)
+    const response = await client.delete(`/games/${gameSecureId}`).loginAs(adminUser)
 
     response.assertStatus(200)
-    response.assertBodyContains({ gameFound: {} })
+    response.assertBody({
+      message: 'Game was successfully deleted!',
+    })
   })
 })

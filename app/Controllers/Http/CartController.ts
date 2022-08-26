@@ -34,7 +34,6 @@ export default class CartController {
       cartFound = await Cart.firstOrFail()
       return response.ok({ cartFound })
     } catch (error) {
-      await cartTransaction.rollback()
       return response.badRequest({ error: `Couldn't find cart after being updated.` })
     }
   }
