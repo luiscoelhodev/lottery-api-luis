@@ -14,6 +14,8 @@ import ResetPasswordValidator from 'App/Validators/Auth/ResetPasswordValidator'
 
 import { DateTime } from 'luxon'
 
+import { myLotteryProducer } from '../../Services/kafkaProducer'
+
 export default class UsersController {
   public async index({ response }: HttpContextContract) {
     try {
@@ -55,6 +57,8 @@ export default class UsersController {
     }
 
     await userTransaction.commit()
+
+    myLotteryProducer(user.name)
 
     let userFound
 
