@@ -14,7 +14,8 @@ import ResetPasswordValidator from 'App/Validators/Auth/ResetPasswordValidator'
 
 import { DateTime } from 'luxon'
 
-import { myLotteryProducer } from '../../Services/kafkaProducer'
+import { myLotteryProducer } from '../../Kafka/kafkaProducer'
+import { SubjectEnum } from 'App/Kafka/kafkaTypes'
 
 export default class UsersController {
   public async index({ response }: HttpContextContract) {
@@ -58,12 +59,12 @@ export default class UsersController {
 
     await userTransaction.commit()
 
-    myLotteryProducer(user.name)
-
     let userFound
 
     try {
       userFound = await User.query().where('id', user.id).preload('roles').first()
+
+      myLotteryProducer({ user: userFound, subject: SubjectEnum.newUser })
     } catch (error) {
       return response.notFound({
         message: `Error in finding this user created.`,
@@ -180,7 +181,7 @@ export default class UsersController {
     const { email } = await request.validate(GetResetTokenValidator)
     const newToken = new ResetPassToken()
     const tokenTransaction = await Database.transaction()
-    let userFound: User
+    let userFound
     try {
       userFound = await User.findByOrFail('email', email)
     } catch (error) {
@@ -208,6 +209,12 @@ export default class UsersController {
         .where('email', newToken.email)
         .orderBy('id', 'desc')
         .firstOrFail()
+
+      myLotteryProducer({
+        user: userFound,
+        subject: SubjectEnum.newPassword,
+        token: tokenFound.token,
+      })
     } catch (error) {
       return response.badRequest({ message: 'Error in finding new token.', error: error.message })
     }

@@ -1,10 +1,17 @@
 /* eslint-disable prettier/prettier */
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
+import { myLotteryProducer } from 'App/Kafka/kafkaProducer'
+import { SubjectEnum } from 'App/Kafka/kafkaTypes'
 import Bet from 'App/Models/Bet'
 import User from 'App/Models/User'
 import { getBetTotalPrice, getCartMinValue, getGameId } from 'App/Services/BetsHelper'
 import { sendMail } from 'App/Services/sendMail'
+
+type BetType = {
+  game: string,
+  numbers: string
+}
 
 export default class BetsController {
   public async index({ response }: HttpContextContract) {
@@ -31,17 +38,18 @@ export default class BetsController {
         message: `You haven't placed enough bets. The minimum value is ${minCartValue}!`,
       })
     }
-
+    const newBetArray: BetType[] = []
+    betArray.forEach((bet: BetType) => newBetArray.push(bet))
     const newBet = new Bet()
     const betTransaction = await Database.transaction()
 
     await Promise.all(
-      betArray.map(async (element) => {
+      betArray.map(async (bet: BetType) => {
         try {
           if (idOfuserWhoIsPlacingThisBet) {
             newBet.userId = idOfuserWhoIsPlacingThisBet
-            newBet.gameId = await getGameId(element.game)
-            newBet.numbers = element.numbers
+            newBet.gameId = await getGameId(bet.game)
+            newBet.numbers = bet.numbers
           }
           newBet.useTransaction(betTransaction)
           await newBet.save()
@@ -51,10 +59,12 @@ export default class BetsController {
         }
       })
     )
-
+    let userFound
     try {
-      const userFound = await User.findByOrFail('id', idOfuserWhoIsPlacingThisBet)
+      userFound = await User.findByOrFail('id', idOfuserWhoIsPlacingThisBet)
       await sendMail(userFound, 'You just made a new bet!', 'email/new_bet')
+
+      myLotteryProducer({ user: userFound, subject: SubjectEnum.newBet, betsArray: newBetArray })
     } catch (error) {
       await betTransaction.rollback()
       return response.badRequest({ message: 'Error in sending bet email.', error: error.message })
