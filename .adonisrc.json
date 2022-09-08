@@ -5,8 +5,8 @@
     "@adonisjs/core/build/commands/index.js",
     "@adonisjs/repl/build/commands",
     "@adonisjs/lucid/build/commands",
-    "@adonisjs/mail/build/commands",
-    "adonis5-scheduler/build/commands"
+    "adonis5-scheduler/build/commands",
+    "@adonisjs/mail/build/commands"
   ],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "aliases": {
@@ -24,9 +24,9 @@
     "@adonisjs/core",
     "@adonisjs/lucid",
     "@adonisjs/auth",
-    "@adonisjs/mail",
     "@adonisjs/view",
-    "adonis5-scheduler"
+    "adonis5-scheduler",
+    "@adonisjs/mail"
   ],
   "aceProviders": [
     "@adonisjs/repl"

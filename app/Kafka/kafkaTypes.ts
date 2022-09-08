@@ -32,5 +32,6 @@ type MessageFromProducer = {
   subject: string
   token?: string
   betsArray?: Bet[]
+  arrayOfAdminUsers?: User[]
 }
 export { TopicEnum, Bet, MessageFromProducer, SubjectEnum, User }

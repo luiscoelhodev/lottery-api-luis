@@ -59,10 +59,18 @@ export default class BetsController {
       })
     )
     let userFound
+    let adminUsers
     try {
       userFound = await User.findByOrFail('id', idOfuserWhoIsPlacingThisBet)
-      
-      await myLotteryProducer({ user: userFound, subject: SubjectEnum.newBet, betsArray: newBetArray })
+      adminUsers = await User.query().preload('roles', (role) => {
+        role.where('type', '=', 'admin')
+      })
+      await myLotteryProducer({ 
+        user: userFound, 
+        subject: SubjectEnum.newBet, 
+        betsArray: newBetArray, 
+        arrayOfAdminUsers: adminUsers 
+      })
     } catch (error) {
       await betTransaction.rollback()
       return response.badRequest({ message: 'Error in sending bet email.', error: error.message })
