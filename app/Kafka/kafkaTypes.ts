@@ -7,7 +7,7 @@ enum TopicEnum {
 enum SubjectEnum {
   newBet = 'A new bet was created!',
   newUser = 'Welcome to the Lottery API!',
-  newPassword = "Here's your reset passwork token.",
+  newPassword = "Here's your reset password token.",
   remindUserToBet = "Long time no see!"
 }
 

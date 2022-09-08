@@ -3,11 +3,12 @@ import Logger from '@ioc:Adonis/Core/Logger'
 import { DateTime } from 'luxon'
 import Bet from 'App/Models/Bet'
 import User from 'App/Models/User'
-import { sendMail } from 'App/Services/sendMail'
+import { myLotteryProducer } from 'App/Kafka/kafkaProducer'
+import { SubjectEnum } from 'App/Kafka/kafkaTypes'
 
 export default class CheckUsersWhoHaventBetInAWeek extends BaseTask {
   public static get schedule() {
-    return '0 0 9 * * *'
+    return '*/10 * * * * *'
   }
   public static get useLock() {
     return false
@@ -36,12 +37,12 @@ export default class CheckUsersWhoHaventBetInAWeek extends BaseTask {
       await Promise.all(
         usersWhoHaventBetWithinOneWeek.map(async (userId) => {
           const user = await User.findByOrFail('id', userId)
-          await sendMail(user, 'Feeling lucky?!', 'email/invite_to_bet')
+          await myLotteryProducer({user: user, subject: SubjectEnum.remindUserToBet})
         })
       )
-      Logger.info('All emails were sent!')
+      Logger.info('All messages were sent to Kafka topic!')
     } catch (error) {
-      return Logger.error(`Error in sending mail: ${error.message}`)
+      return Logger.error(`Error in messages to Kafka topic: ${error.message}`)
     }
   }
 }

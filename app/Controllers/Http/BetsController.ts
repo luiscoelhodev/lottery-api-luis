@@ -6,7 +6,6 @@ import { SubjectEnum } from 'App/Kafka/kafkaTypes'
 import Bet from 'App/Models/Bet'
 import User from 'App/Models/User'
 import { getBetTotalPrice, getCartMinValue, getGameId } from 'App/Services/BetsHelper'
-import { sendMail } from 'App/Services/sendMail'
 
 type BetType = {
   game: string,

@@ -6,7 +6,6 @@ import ResetPassToken from 'App/Models/ResetPassToken'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'
 
-import { sendMail, sendResetPasswordTokenMail } from 'App/Services/sendMail'
 import StoreValidator from 'App/Validators/User/StoreValidator'
 import UpdateValidator from 'App/Validators/User/UpdateValidator'
 import GetResetTokenValidator from 'App/Validators/Auth/GetResetTokenValidator'
