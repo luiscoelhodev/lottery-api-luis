@@ -1,3 +1,5 @@
+import { DateTime } from "luxon"
+
 enum TopicEnum {
   emails = 'lottery-api-emails',
 }
@@ -6,6 +8,7 @@ enum SubjectEnum {
   newBet = 'A new bet was created!',
   newUser = 'Welcome to the Lottery API!',
   newPassword = "Here's your reset passwork token.",
+  remindUserToBet = "Long time no see!"
 }
 
 type Bet = {
@@ -20,8 +23,8 @@ type User = {
   cpf: string
   email: string
   password: string
-  createdAt: string
-  updatedAt: string
+  createdAt: DateTime
+  updatedAt: DateTime
 }
 
 type MessageFromProducer = {

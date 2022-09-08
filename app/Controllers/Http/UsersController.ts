@@ -48,11 +48,11 @@ export default class UsersController {
     }
 
     try {
-      await sendMail(user, 'Welcome to Lottery API!', 'email/welcome')
+      await myLotteryProducer({user: user, subject: SubjectEnum.newUser})
     } catch (error) {
       await userTransaction.rollback()
       return response.badRequest({
-        message: `Error in sending welcome email.`,
+        message: `Error in sending welcome message to Kafka Topic.`,
         error: error.message,
       })
     }
@@ -63,8 +63,6 @@ export default class UsersController {
 
     try {
       userFound = await User.query().where('id', user.id).preload('roles').first()
-
-      myLotteryProducer({ user: userFound, subject: SubjectEnum.newUser })
     } catch (error) {
       return response.notFound({
         message: `Error in finding this user created.`,
@@ -210,19 +208,18 @@ export default class UsersController {
         .orderBy('id', 'desc')
         .firstOrFail()
 
-      myLotteryProducer({
-        user: userFound,
-        subject: SubjectEnum.newPassword,
-        token: tokenFound.token,
-      })
     } catch (error) {
       return response.badRequest({ message: 'Error in finding new token.', error: error.message })
     }
 
     try {
-      await sendResetPasswordTokenMail(userFound, tokenFound, 'email/reset_password_token')
+      await myLotteryProducer({
+        user: userFound,
+        subject: SubjectEnum.newPassword,
+        token: tokenFound.token,
+      })
     } catch (error) {
-      return response.badRequest({ message: `Error in sending token email.`, error: error.message })
+      return response.badRequest({ message: `Error in sending token message to Kafka Topic.`, error: error.message })
     }
 
     return response.ok({ message: 'The token was successfully sent to your email!' })

@@ -62,9 +62,8 @@ export default class BetsController {
     let userFound
     try {
       userFound = await User.findByOrFail('id', idOfuserWhoIsPlacingThisBet)
-      await sendMail(userFound, 'You just made a new bet!', 'email/new_bet')
-
-      myLotteryProducer({ user: userFound, subject: SubjectEnum.newBet, betsArray: newBetArray })
+      
+      await myLotteryProducer({ user: userFound, subject: SubjectEnum.newBet, betsArray: newBetArray })
     } catch (error) {
       await betTransaction.rollback()
       return response.badRequest({ message: 'Error in sending bet email.', error: error.message })
