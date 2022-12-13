@@ -57,7 +57,7 @@ Route.post('/user/reset-password', 'UsersController.validateTokenToResetPassword
 // Private Routes (Authentication required)
 
 Route.group(() => {
-  Route.post('/users/update', 'UsersController.update')
+  Route.patch('/users/update', 'UsersController.update')
   Route.get('/users/my-account', 'UsersController.retrieveUsersInfo')
 }).middleware(['auth'])
 
