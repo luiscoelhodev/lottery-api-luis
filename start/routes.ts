@@ -59,7 +59,7 @@ Route.post('/user/reset-password', 'UsersController.validateTokenToResetPassword
 Route.group(() => {
   Route.post('/users/update', 'UsersController.update')
   Route.get('/users/my-account', 'UsersController.retrieveUsersInfo')
-}).middleware(['auth', 'is:player'])
+}).middleware(['auth'])
 
 Route.group(() => {
   Route.resource('/users', 'UsersController').only(['index', 'show', 'destroy'])
