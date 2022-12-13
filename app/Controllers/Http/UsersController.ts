@@ -95,10 +95,10 @@ export default class UsersController {
     }
   }
 
-  public async update({ params, request, response }: HttpContextContract) {
+  public async update({ auth, request, response }: HttpContextContract) {
     await request.validate(UpdateValidator)
 
-    const userSecureId = params.id
+    const userSecureId = auth.user?.secureId
     const userBody = request.only(['name', 'cpf', 'email', 'password'])
 
     const userToBeUpdated = await User.findByOrFail('secure_id', userSecureId)
