@@ -2,7 +2,7 @@ import ResetPassToken from 'App/Models/ResetPassToken'
 import { DateTime } from 'luxon'
 
 export async function generateExpiredToken(userEmail: string) {
-  const nowMinusThirtyOneMinutes = DateTime.now().minus({ minutes: 31 })
+  const nowMinusThirtyOneMinutes = DateTime.now().minus({ days: 2 })
   const newExpiredToken = new ResetPassToken()
 
   newExpiredToken.email = userEmail

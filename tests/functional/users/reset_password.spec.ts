@@ -68,6 +68,7 @@ test.group('User reset password', (resetPasswordTest) => {
     client,
   }) => {
     const expiredToken = await generateExpiredToken('player@email.com')
+    console.log(expiredToken)
     const response = await client
       .post('/user/reset-password')
       .json({ token: expiredToken, newPassword: '12345678' })
